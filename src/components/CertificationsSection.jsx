@@ -1,71 +1,73 @@
-import FullScreenSection from "./common/FullScreenSection";
-import { Heading, SimpleGrid } from "@chakra-ui/react";
-import CardComponent from "./common/CardComponent";
-import {
-  certificate1,
-  certificate2,
-  certificate3,
-  certificate4,
-  certificate5,
-  certificate6,
-} from "../Assets/assets";
+import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { certifications } from "@/data/portfolio";
 
-const certifications = [
-  {
-    title: "Advanced React",
-    imageSrc: certificate6,
-    url: "https://coursera.org/share/6983f06728f38b983398d6be9623a563",
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
   },
-  {
-    title: "React Basics",
-    imageSrc: certificate5,
-    url: "https://coursera.org/share/9b5d61145d0b5953dec2596f0d79d004",
-  },
-  {
-    title: "Version Control",
-    imageSrc: certificate4,
-    url: "https://coursera.org/share/c2e91798bd5bcdcff7e53fbf06952901",
-  },
-  {
-    title: "Programming With JavaScript",
-    imageSrc: certificate3,
-    url: "https://coursera.org/share/e31a456fd18313a76ce72dc651f3d24b",
-  },
-  {
-    title: "HTML and CSS In Depth",
-    imageSrc: certificate2,
-    url: "https://coursera.org/share/38c16912f7f9c7e30d8d50ca3577bc58",
-  },
-  {
-    title: "Introduction to Frontend-Development",
-    imageSrc: certificate1,
-    url: "https://coursera.org/share/4ae2183221b69361a350e64f36a9ced8",
-  },
-];
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const CertificationsSection = () => {
   return (
-    <FullScreenSection
-      id="certifications-section"
-      backgroundColor="#101820"
-      isDarkBackground
-      p={8}
-      alignItems="flex-start"
-      spacing={8}
-    >
-      <Heading as="h1">My Certifications</Heading>
-      <SimpleGrid columns={[1, 1, 2, 2, 2, 2]} gap={5}>
-        {certifications.map((certification) => (
-          <div key={certification.title}>
-            <CardComponent
-              title={certification.title}
-              imageSrc={certification.imageSrc}
-              url={certification.url}
-            />
-          </div>
-        ))}
-      </SimpleGrid>
-    </FullScreenSection>
+    <section id="certifications" className="py-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl font-bold text-center mb-2">
+            {certifications.heading}
+          </h2>
+          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            {certifications.description}
+          </p>
+        </motion.div>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {certifications.items.map((cert) => (
+            <motion.div key={cert.title} variants={itemVariants}>
+              <a
+                href={cert.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                  <div className="overflow-hidden bg-muted">
+                    <img
+                      src={cert.image}
+                      alt={cert.title}
+                      className="w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <h3 className="font-medium text-sm">{cert.title}</h3>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </CardContent>
+                </Card>
+              </a>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
   );
 };
 

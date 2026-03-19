@@ -1,22 +1,24 @@
-import CertificationsSection from "./components/CertificationsSection";
-import ContactMeSection from "./components/ContactMeSection";
-import Footer from "./components/Footer";
-import LandingSection from "./components/LandingSection";
 import NavBar from "./components/NavBar";
+import HeroSection from "./components/HeroSection";
+import AboutSection from "./components/AboutSection";
+import SkillsSection from "./components/SkillsSection";
 import ProjectsSection from "./components/ProjectsSection";
-import Alert from "./components/common/Alert";
-import ScrollToTop from "./components/common/ScrollToTop";
+import CertificationsSection from "./components/CertificationsSection";
+import ContactSection from "./components/ContactSection";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 const App = () => {
   return (
-    <main>
+    <main className="min-h-screen bg-background text-foreground">
       <NavBar />
-      <LandingSection />
+      <HeroSection />
+      <AboutSection />
+      <SkillsSection />
       <ProjectsSection />
       <CertificationsSection />
-      <ContactMeSection />
+      <ContactSection />
       <Footer />
-      <Alert />
       <ScrollToTop />
     </main>
   );
