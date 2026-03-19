@@ -1,150 +1,204 @@
-import { useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { Resume } from "../Assets/assets";
+import { useState, useEffect } from "react";
+import { Menu, Github, Linkedin, Mail, FileText, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { personalInfo, socials, navLinks } from "@/data/portfolio";
 
-const socials = [
-  {
-    icon: faEnvelope,
-    url: "mailto:saipruthvik460@gmail.com",
-  },
-  {
-    icon: faGithub,
-    url: "https://github.com/Pruthvik007",
-  },
-  {
-    icon: faLinkedin,
-    url: "https://www.linkedin.com/in/sai-pruthvik-3515b9314/",
-  },
-];
+const iconMap = {
+  email: Mail,
+  github: Github,
+  linkedin: Linkedin,
+};
 
 const NavBar = () => {
-  const headerRef = useRef();
-  const [navbarOpen, setNavbarOpen] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+  const [open, setOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
-  const handleClick = (anchor) => (e) => {
-    e.preventDefault();
-    const component = document.getElementById(`${anchor}-section`);
-    if (component) {
-      setNavbarOpen(false); // Close the navbar
-      window.scrollTo({
-        top: component.offsetTop - headerHeight + 5,
-        behavior: "smooth",
-      });
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const sectionIds = navLinks.map((link) => link.href);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      { rootMargin: "-40% 0px -60% 0px" }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollTo = (id) => {
+    setOpen(false);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setNavbarOpen(false); // Close the navbar on resize
-      setHeaderHeight(headerRef.current.offsetHeight);
-    };
-
-    setHeaderHeight(headerRef.current.offsetHeight);
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
-    <div
-      id="header-container"
-      ref={headerRef}
-      style={{
-        position: "fixed",
-        top: "0",
-        left: "0",
-        right: "0",
-        backgroundColor: "",
-        zIndex: "9999",
-      }}
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/80 backdrop-blur-md border-b border-border shadow-sm"
+          : "bg-transparent"
+      }`}
     >
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-1">
+      <nav className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-8 h-16 flex items-center justify-between">
         <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-          onClick={() => setNavbarOpen(!navbarOpen)}
+          onClick={() => scrollTo("hero")}
+          className="text-lg font-bold text-foreground hover:text-primary transition-colors cursor-pointer"
         >
-          <span className="navbar-toggler-icon"></span>
+          {personalInfo.initials}
         </button>
-        <a
-          onClick={handleClick("landing")}
-          href="/#home"
-          className="navbar-brand"
-        >
-          Portfolio
-        </a>
-        <ul className="nav navbar-nav d-flex flex-row">
-          {socials.map((social) => (
-            <li key={social.url} className="nav-item">
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <button
+              key={link.href}
+              onClick={() => scrollTo(link.href)}
+              className={`text-sm transition-colors cursor-pointer ${
+                activeSection === link.href
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {link.label}
+            </button>
+          ))}
+          <a href={personalInfo.resume} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Resume
+            </Button>
+          </a>
+        </div>
+
+        {/* Social icons + theme toggle - desktop */}
+        <div className="hidden md:flex items-center gap-3">
+          {socials.map((social) => {
+            const Icon = iconMap[social.platform];
+            return Icon ? (
               <a
-                className="nav-link"
                 key={social.url}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ marginLeft: "10px" }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={social.label}
               >
-                <FontAwesomeIcon icon={social.icon} />
+                <Icon className="h-5 w-5" />
               </a>
-            </li>
-          ))}
-        </ul>
-        <div
-          className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
-          id="navbarNav"
-        >
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                onClick={handleClick("projects")}
-                href="/#projects"
-              >
-                Projects
+            ) : null;
+          })}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+
+        {/* Mobile nav */}
+        <div className="flex md:hidden items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+          <SheetContent side="right" className="w-72 px-6 pt-12">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <div className="flex flex-col gap-6">
+              {navLinks.map((link) => (
+                <button
+                  key={link.href}
+                  onClick={() => scrollTo(link.href)}
+                  className={`text-left text-lg transition-colors cursor-pointer ${
+                    activeSection === link.href
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ))}
+              <a href={personalInfo.resume} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="w-full gap-2">
+                  <FileText className="h-4 w-4" />
+                  Resume
+                </Button>
               </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                onClick={handleClick("certifications")}
-                href="/#certifications"
-              >
-                Certifications
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" target="_blank" href={Resume}>
-                My Resume
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                onClick={handleClick("contactme")}
-                href="/#contact-me"
-              >
-                Contact Me
-              </a>
-            </li>
-          </ul>
+              <div className="flex items-center gap-4 pt-4 border-t border-border">
+                {socials.map((social) => {
+                  const Icon = iconMap[social.platform];
+                  return Icon ? (
+                    <a
+                      key={social.url}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={social.label}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </a>
+                  ) : null;
+                })}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+          </Sheet>
         </div>
       </nav>
-    </div>
+    </header>
   );
 };
 
 export default NavBar;
-/*
-
-*/
