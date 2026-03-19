@@ -19,16 +19,31 @@ const ContactSection = () => {
     email: "",
     message: "",
   });
+  const [errors, setErrors] = useState({});
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!EMAIL_REGEX.test(formData.email)) newErrors.email = "Enter a valid email address";
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+    else if (formData.message.trim().length < 25) newErrors.message = "Message must be at least 25 characters";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!contact.formAction) return;
+    if (!contact.formAction || !validate()) return;
 
     setLoading(true);
     setStatus(null);
@@ -97,8 +112,8 @@ const ContactSection = () => {
                 placeholder="Your name"
                 value={formData.name}
                 onChange={handleChange}
-                required
               />
+              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
             </div>
             <div>
               <label
@@ -114,8 +129,8 @@ const ContactSection = () => {
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                required
               />
+              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
             </div>
             <div>
               <label
@@ -131,9 +146,8 @@ const ContactSection = () => {
                 rows={5}
                 value={formData.message}
                 onChange={handleChange}
-                required
-                minLength={25}
               />
+              {errors.message && <p className="text-sm text-destructive mt-1">{errors.message}</p>}
             </div>
             <Button
               type="submit"
